@@ -10,7 +10,7 @@ public class PicFilter implements FilenameFilter
 	@Override
 	public boolean accept(File dir, String name)
 	{
-		if (name.endsWith("jpg") || name.endsWith("gif")||name.endsWith("png"))
+		if (name.endsWith("jpg") || name.endsWith("gif")||name.endsWith("png") || name.endsWith("bmp"))
 			return true;
 		else
 			return false;

@@ -14,7 +14,7 @@ class PicFilenameFilter implements FilenameFilter{
 	@Override
 	public boolean accept(File dir, String name) {
 		if(name.endsWith("jpg") || name.endsWith("jpeg")
-				|| name.endsWith("png") || name.endsWith("gif"))
+				|| name.endsWith("png") || name.endsWith("gif") || name.endsWith("bmp"))
 			return true;
 		return false;
 	}
