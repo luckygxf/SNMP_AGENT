@@ -50,7 +50,8 @@ public class ReceiveImage {
     private final String DEFAULT_ENCODE = "UTF-8";
     private final String ISO_ENCODE = "ISO-8859-1";
     
-    //播放方案名
+    //显示屏名和播放方案名
+    private String displayName;
     private String solutionName;
 	
 	public ReceiveImage(){
@@ -133,6 +134,11 @@ public class ReceiveImage {
 				//获取播放方案名
 				int solutionNameEndIndex = imageName.indexOf('.');
 				solutionName = imageName.substring(0, solutionNameEndIndex);
+				//这里需要获取显示屏名和播放方案名
+				String names[] = solutionName.split("\\+");
+				String displayName = names[0];
+				String playSolutinName = names[1];
+				this.displayName = displayName;
 				
 				sb.delete(0, file_name_end + IMAGE_FILE_NAME_END.length());
 				
@@ -148,7 +154,16 @@ public class ReceiveImage {
 				
 				//读取image content
 				System.out.println("开始读image content...");
-				String imagePath = this.imageDir + File.separator + "playSolutions" + File.separator + imageName;				
+				//压缩包位置
+//				String imagePath = this.imageDir + File.separator + "playSolutions" + File.separator + imageName;		
+				//创建显示屏文件夹
+				String displayDicPath = this.imageDir + File.separator + "playSolutions" + File.separator + displayName;
+				File displayFile = new File(displayDicPath);
+				if(!displayFile.exists()){
+					displayFile.mkdirs();
+				}
+				
+				String imagePath = this.imageDir + File.separator + "playSolutions" + File.separator + displayName + File.separator + imageName;	
 				File imageFile  = new File(imagePath);
 				OutputStream os = new FileOutputStream(imageFile);					//文件输出流
 				
@@ -171,7 +186,7 @@ public class ReceiveImage {
 
 				
 				//重新加载播放方案
-				reLoadSolution(this.solutionName);
+				reLoadSolution(this.displayName, this.solutionName);
 				System.out.println("新的播放方案接收完成!");
 				
 				//关闭clientSocket
@@ -252,10 +267,10 @@ public class ReceiveImage {
 	 * 重新加载播放方案
 	 * @param solutionName
 	 */
-	public void reLoadSolution(String solutionName){
+	public void reLoadSolution(String displayName, String solutionName){
 		//该解压播放方案
 //		util.unzipSolution(PicPlayer.solutionName);
-		
+		PicFullScreen.displayName = displayName;
 		PicFullScreen.solutionName = solutionName;
 		PicFullScreen.setIsReloadSolution(true);
 	}

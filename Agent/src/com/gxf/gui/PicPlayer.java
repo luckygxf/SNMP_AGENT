@@ -1,6 +1,9 @@
 package com.gxf.gui;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.StatusLineManager;
@@ -36,6 +39,7 @@ import com.gxf.snmp.MyIP;
 import com.gxf.snmp.SnmpReceiveMessage;
 import com.gxf.util.Config;
 import com.gxf.util.PicFilter;
+import com.gxf.util.PlayControl;
 import com.gxf.util.ReceiveImage;
 import com.gxf.util.SolutionNameFilter;
 import com.gxf.util.Util;
@@ -58,6 +62,7 @@ public class PicPlayer extends ApplicationWindow {
 	private Button btn_continue;
 	private Label lb_curPicName;
 	private Combo combo_playSolution;
+	private Combo combo_display;
 	
 	// 文件存储
 	static private File currentPic = null;
@@ -98,9 +103,12 @@ public class PicPlayer extends ApplicationWindow {
 	//存放所有播放方案的文件夹
 	private final String DIC_NAME_PLAY_SOLUTIONS = "playSolutions";
 	
-	//播放方案名称和配置
-	public static Config config;
+	//显示屏、播放方案名称和配置
+//	public static Config config;
 	public static String solutionName;
+	public static String displayName;
+	
+	private List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
 	
 	/**
 	 * Create the application window.
@@ -122,7 +130,7 @@ public class PicPlayer extends ApplicationWindow {
 		Composite container = new Composite(parent, SWT.NONE);
 		
 		scrolledComposite_top = new ScrolledComposite(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolledComposite_top.setBounds(0, 38, 727, 410);
+		scrolledComposite_top.setBounds(0, 38, 856, 410);
 		scrolledComposite_top.setExpandHorizontal(true);
 		scrolledComposite_top.setExpandVertical(true);
 		
@@ -131,23 +139,23 @@ public class PicPlayer extends ApplicationWindow {
 		scrolledComposite_top.setMinSize(canvas_picshow.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		composite_bottom = new Composite(container, SWT.NONE);
-		composite_bottom.setBounds(0, 447, 727, 32);
+		composite_bottom.setBounds(0, 447, 856, 32);
 		
 		//控制面板上面按钮
 		btn_pre = new Button(composite_bottom, SWT.NONE);
-		btn_pre.setBounds(142, 10, 60, 22);
+		btn_pre.setBounds(269, 10, 60, 22);
 		btn_pre.setText("上一张");
 		btn_pre.addSelectionListener(new ButtonSelectionAdapter());
 		
 		
 		btn_next = new Button(composite_bottom, SWT.NONE);		
 		btn_next.setText("下一张");
-		btn_next.setBounds(230, 10, 60, 22);
+		btn_next.setBounds(357, 10, 60, 22);
 		btn_next.addSelectionListener(new ButtonSelectionAdapter());
 		
 		btn_attr = new Button(composite_bottom, SWT.NONE);
 		btn_attr.setText("属性");
-		btn_attr.setBounds(320, 10, 60, 22);
+		btn_attr.setBounds(447, 10, 60, 22);
 		btn_attr.addSelectionListener(new ButtonSelectionAdapter());
 		
 		//实际大小，暂时不使用隐藏起来
@@ -160,12 +168,12 @@ public class PicPlayer extends ApplicationWindow {
 		//全屏显示
 		btn_fullscreen = new Button(composite_bottom, SWT.NONE);
 		btn_fullscreen.setText("全屏显示");
-		btn_fullscreen.setBounds(420, 10, 60, 22);
+		btn_fullscreen.setBounds(547, 10, 60, 22);
 		btn_fullscreen.addSelectionListener(new ButtonSelectionAdapter());
 		
 		//面板上面部分
 		composite_menu = new Composite(container, SWT.NONE);
-		composite_menu.setBounds(0, 0, 727, 38);
+		composite_menu.setBounds(0, 0, 856, 38);
 		
 		lb_playtimeinterval_icon = new Label(composite_menu, SWT.NONE);
 		lb_playtimeinterval_icon.setBounds(0, 10, 72, 12);
@@ -182,38 +190,45 @@ public class PicPlayer extends ApplicationWindow {
 		
 		//播放按钮
 		btn_play = new Button(composite_menu, SWT.NONE);
-		btn_play.setBounds(318, 7, 64, 22);
+		btn_play.setBounds(423, 7, 64, 22);
 		btn_play.setText("播放");
 		btn_play.addSelectionListener(new ButtonSelectionAdapter());
 		
 		//暂停播放
 		btn_stop = new Button(composite_menu, SWT.NONE);
-		btn_stop.setBounds(388, 7, 64, 22);
+		btn_stop.setBounds(493, 7, 64, 22);
 		btn_stop.setText("暂停播放");
 		btn_stop.addSelectionListener(new ButtonSelectionAdapter());
 		
 		//继续播放按钮
 		btn_continue = new Button(composite_menu, SWT.NONE);
 		btn_continue.setText("继续播放");
-		btn_continue.setBounds(458, 7, 64, 22);		
+		btn_continue.setBounds(563, 7, 64, 22);		
 		btn_continue.addSelectionListener(new ButtonSelectionAdapter());
 		
 		//显示当前播放图片的名字
 		lb_curPicName = new Label(composite_menu, SWT.NONE);
-		lb_curPicName.setBounds(622, 13, 54, 12);
+		lb_curPicName.setBounds(720, 12, 136, 12);
 		lb_curPicName.setText("New Label");
 		
 		lb_curPicIcon = new Label(composite_menu, SWT.NONE);
-		lb_curPicIcon.setBounds(528, 13, 88, 12);
+		lb_curPicIcon.setBounds(633, 12, 88, 12);
 		lb_curPicIcon.setText("当前播放图片:");
 		
 		Label lb_playSolution = new Label(composite_menu, SWT.NONE);
-		lb_playSolution.setBounds(135, 10, 80, 12);
-		lb_playSolution.setText("选择播放方案");
+		lb_playSolution.setBounds(271, 8, 54, 12);
+		lb_playSolution.setText("播放方案");
 		
 		//播放方案列表
 		combo_playSolution = new Combo(composite_menu, SWT.NONE);
-		combo_playSolution.setBounds(221, 7, 86, 20);
+		combo_playSolution.setBounds(331, 7, 86, 20);
+		
+		Label lb_display = new Label(composite_menu, SWT.NONE);
+		lb_display.setBounds(134, 10, 45, 12);
+		lb_display.setText("显示屏");
+		
+		combo_display = new Combo(composite_menu, SWT.NONE);
+		combo_display.setBounds(179, 7, 86, 20);
 		//获取当前窗口shell
 		curShell = parent.getShell();
 		
@@ -237,7 +252,7 @@ public class PicPlayer extends ApplicationWindow {
 			}
 		});
 		//设置按钮状态
-		setButtonEnableOrdis();
+		setButtonEnableOrDis();
 		
 		//设置应用程序logo
 		String logoName = "logo.png";
@@ -256,19 +271,35 @@ public class PicPlayer extends ApplicationWindow {
 		curShell.addListener(SWT.Close, new ShellCloseListener());
 		//为播放方案下拉列表注册监听事件
 		combo_playSolution.addSelectionListener(new SolutionChangeListener());
+		//初始化显示屏信息
+		String displayNames[] = getDisplayNames();
+		
+		//初始化显示屏信息
+		if(displayNames.length != 0){
+			combo_display.setItems(displayNames);
+			combo_display.select(0);
+		}
 		
 		//初始化播放方案
 		String playSolutions[] = getSolutions();
-		combo_playSolution.setItems(playSolutions);
-		combo_playSolution.select(0);
+		if(playSolutions.length != 0){
+			combo_playSolution.setItems(playSolutions);
+			combo_playSolution.select(0);
+		}
+		
+		//没有可以播放的播放方案
+		if(combo_display.getItemCount() == 0 || combo_playSolution.getItemCount() == 0)
+			return;
 		
 		//导入要播放的方案
-		importPlaySolution(combo_playSolution.getItem(combo_playSolution.getSelectionIndex()));		
+		importPlaySolution();		
 		solutionName = combo_playSolution.getItem(combo_playSolution.getSelectionIndex());
-		config = util.parseConfigXml(solutionName);
-		txt_playtime_interval.setText(String.valueOf(config.getPlayTimeInterval()));
+
+		//初始化直接选择0就ok了
+		listOfPlayControl = util.parseXml(combo_display.getItem(0), combo_playSolution.getItem(0));
+		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
 		//启动需要的后台线程
-		initThread();
+//		initThread();
 	}
 
 	/**
@@ -351,7 +382,7 @@ public class PicPlayer extends ApplicationWindow {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(735, 572);
+		return new Point(864, 572);
 	}
 	
 	/**
@@ -393,7 +424,7 @@ public class PicPlayer extends ApplicationWindow {
 					
 					@Override
 					public void run() {
-						picFullScreen = new PicFullScreen(solutionName);
+						picFullScreen = new PicFullScreen(displayName, solutionName);
 						//设置当前shell不可见
 						curShell.setVisible(false);						
 						//显示shell
@@ -439,24 +470,33 @@ public class PicPlayer extends ApplicationWindow {
 	/**
 	 * 导入播放方案
 	 */
-	public void importPlaySolution(String solutionName){		
+	public void importPlaySolution(){		
+		//如果没有播放方案
+		if(combo_display.getItemCount() == 0 || combo_playSolution.getItemCount() == 0)
+			return;
+		//获取显示屏名称和播放方案名
+		String displayName = combo_display.getItem(combo_display.getSelectionIndex());
+		String playSolutionName = combo_playSolution.getItem(combo_playSolution.getSelectionIndex());
+		
+		//-----------------------------华丽丽的分割线-------------------------------------
 		String projectPath = util.getCurrentProjectPath();
-		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS 
-							+ File.separator + solutionName;
+		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS + File.separator + displayName
+							+ File.separator + playSolutionName;
 		//设置播放方案名称,全屏是要用到
-		PicPlayer.solutionName = solutionName;
+		PicPlayer.solutionName = playSolutionName;
+		PicPlayer.displayName = displayName;
 		//文件夹中所有图片,生成File对象
 		File dirc = new File(filePath);
 		pics = dirc.listFiles(new PicFilter());		
 		currentPic = pics[0];
 		picPoint = 0;
 		//导入配置文件，解析
-		config = util.parseConfigXml(solutionName);
-		txt_playtime_interval.setText(String.valueOf(config.getPlayTimeInterval()));
+		listOfPlayControl = util.parseXml(displayName, playSolutionName);
+		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
 		
 		//设置按钮状态
 		isImportSolution = true;
-		setButtonEnableOrdis();
+		setButtonEnableOrDis();
 		
 		//显示图片到画布上
 		drawImage(); 
@@ -478,6 +518,8 @@ public class PicPlayer extends ApplicationWindow {
 		lb_curPicName.setVisible(true);
 		lb_curPicName.setText(currentPic.getName());
 		canvas_picshow.redraw();
+		//显示播放间隔时间
+		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
 		
 	}
 	
@@ -522,7 +564,7 @@ public class PicPlayer extends ApplicationWindow {
 	/**
 	 * 导入播放方案设置按钮为enable, 否则设置为disable
 	 */
-	private void setButtonEnableOrdis(){
+	private void setButtonEnableOrDis(){
 		btn_play.setEnabled(isImportSolution);
 		btn_stop.setEnabled(isImportSolution);
 		btn_continue.setEnabled(isImportSolution);
@@ -551,7 +593,12 @@ public class PicPlayer extends ApplicationWindow {
 						}
 					});
 					try {
-						sleep((long)(config.getPlayTimeInterval() * 1000));
+						//获取播放时间间隔 
+						int timeInterval = getTimeInterval(picPoint);
+						if(timeInterval == -1){
+							continue;
+						}
+						sleep((long)(timeInterval * 1000));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -577,10 +624,10 @@ public class PicPlayer extends ApplicationWindow {
 	 * 启动需要的后台线程,接收广播消息,接收图片等
 	 */
 	public void initThread(){
-		MyIP myIp = new MyIP();
-		SnmpReceiveMessage messageReceiver = new SnmpReceiveMessage();
-		myIp.run();											//启动接收广播消息线程
-		messageReceiver.run();								//启动消息接收器，这里监听的是16200端口
+//		MyIP myIp = new MyIP();
+//		SnmpReceiveMessage messageReceiver = new SnmpReceiveMessage();
+//		myIp.run();											//启动接收广播消息线程
+//		messageReceiver.run();								//启动消息接收器，这里监听的是16200端口
 		ReceiveImage receiveImage = new ReceiveImage();
 		receiveImage.listen();								//监听16201端口接收图片
 	}
@@ -614,8 +661,13 @@ public class PicPlayer extends ApplicationWindow {
 	 * @return
 	 */
 	private String[] getSolutions(){
-		//获取存放播放方案的路径
-		String solutionsPath = util.getCurrentProjectPath() + File.separator + DIC_NAME_PLAY_SOLUTIONS;
+		if(combo_display.getItemCount() == 0)
+			return new String[0];
+		
+		//获取显示屏名
+		String displayName = combo_display.getItem(combo_display.getSelectionIndex());
+		String solutionsPath = util.getCurrentProjectPath() + File.separator + DIC_NAME_PLAY_SOLUTIONS + File.separator + displayName;
+
 		File solutionsFile = new File(solutionsPath);
 		//使用过滤器过滤压缩包
 		File solutionsFiles[] = solutionsFile.listFiles(new SolutionNameFilter());
@@ -646,11 +698,73 @@ public class PicPlayer extends ApplicationWindow {
 		//重新加载播放方案
 		@Override
 		public void widgetSelected(SelectionEvent arg0) {
-			String solutionName = combo_playSolution.getItem(combo_playSolution.getSelectionIndex());
-			importPlaySolution(solutionName);
+			importPlaySolution();
 			
 		}
 		
 	}
 	
+	/**
+	 * 获取所有的显示屏名字
+	 * @return
+	 */
+	private String[] getDisplayNames(){
+		//获取存放播放方案的路径
+		String solutionsPath = util.getCurrentProjectPath() + File.separator + DIC_NAME_PLAY_SOLUTIONS;
+		File solutionsFile = new File(solutionsPath);
+		//使用过滤器过滤压缩包
+		File solutionsFiles[] = solutionsFile.listFiles(new SolutionNameFilter());
+		
+		String result[] = new String[solutionsFiles.length];
+		
+		//获取播放方案名
+		for(int i = 0; i < result.length; i++){
+			result[i] = solutionsFiles[i].getName();
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 获取暂停播放时间
+	 * @param picIndex
+	 * @return
+	 * -1表示不能播放
+	 * >0表示播放几秒
+	 */
+	private int getTimeInterval(int picIndex){
+		//默认可以播放
+		PlayControl playControl = listOfPlayControl.get(picIndex);
+		
+		//1.比较日期范围是否valid
+		//2.比较时间范围是否valid
+		//3.星期是否valid
+		
+		//比较日期+时间
+		java.util.Date curDate = new java.util.Date();
+		String beginDateStr = playControl.getDateTimeStart().toString() + " " +  playControl.getTimeStart();
+		String afterDateStr = playControl.getDateTimeEnd().toString() + " " + playControl.getTimeEnd();
+
+		java.sql.Timestamp beginDate = java.sql.Timestamp.valueOf(beginDateStr);
+		java.sql.Timestamp afterDate = java.sql.Timestamp.valueOf(afterDateStr);
+		
+		if(!(curDate.after(beginDate) && curDate.before(afterDate))){
+			return -1;
+		}
+		
+		//比较星期
+		String weekdaysStr = playControl.getWeekdays();
+		//获取当前星期
+		Calendar c = Calendar.getInstance();
+        int curWeekday = c.get(Calendar.DAY_OF_WEEK) - 1;
+        if(curWeekday < 0)
+        	curWeekday = 6;
+        if(weekdaysStr.charAt(curWeekday) == '0')
+        	return -1;
+        
+        //日期、时间和星期都valid获取播放间隔时间返回
+        int timeInterval = playControl.getTimeInterval();
+		
+        return timeInterval;
+	}
 }

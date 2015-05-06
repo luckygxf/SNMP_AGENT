@@ -2,6 +2,8 @@ package com.gxf.gui;
 
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.Calendar;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -19,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.gxf.util.Config;
 import com.gxf.util.PicFilter;
+import com.gxf.util.PlayControl;
 import com.gxf.util.Util;
 
 public class PicFullScreen {
@@ -44,8 +47,11 @@ public class PicFullScreen {
 	
 	//播放方案配置
 	private Config config;
+	private List<PlayControl> listOfPlayControl;
+	
 	//播放方案名称
 	public static String solutionName;
+	public static String displayName;
 	
 	//工具类
 	private Util util = new Util();
@@ -55,8 +61,9 @@ public class PicFullScreen {
 	//存放所有播放方案的文件夹
 	private final String DIC_NAME_PLAY_SOLUTIONS = "playSolutions";
 
-	public PicFullScreen(String solutionName){
+	public PicFullScreen(String displayName, String solutionName){
 		PicFullScreen.solutionName = solutionName;
+		PicFullScreen.displayName = displayName;
 	}
 	public void open(){
 		//初始化控件
@@ -114,7 +121,7 @@ public class PicFullScreen {
 		});		
 		
 		//导入播放方案
-		importPlaySolution(solutionName);
+		importPlaySolution(displayName, solutionName);
 		
 		//设置curPic
 		currentPic = pics[picPoint];	
@@ -193,7 +200,7 @@ public class PicFullScreen {
 			while(!getIsStop()){
 				if(getIsReloadSolution()){							//重新导入播放方案
 					System.out.println("接收到新播放方案，重新加载播放方案!");
-					importPlaySolution(solutionName);
+					importPlaySolution(displayName, solutionName);
 					setIsReloadSolution(false);						//避免一直导入	
 				}
 				picPoint = picPoint % pics.length;
@@ -208,7 +215,15 @@ public class PicFullScreen {
 					}
 				});
 				try {
-					sleep((long)(config.getPlayTimeInterval() * 1000));
+//					sleep((long)(config.getPlayTimeInterval() * 1000));
+					//获取播放间隔
+					int timeInterval = getTimeInterval(picPoint);
+					if(timeInterval == -1)
+					{
+						picPoint++;
+						continue;
+					}
+					sleep((long)(timeInterval * 1000));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -260,12 +275,14 @@ public class PicFullScreen {
 	/**
 	 * 导入播放方案
 	 */
-	public void importPlaySolution(String solutionName){		
+	public void importPlaySolution(String displayName, String solutionName){		
 		String projectPath = util.getCurrentProjectPath();
-		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS 
-							+ File.separator + solutionName;
+//		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS 
+//							+ File.separator + solutionName;
+		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS + File.separator + displayName
+				+ File.separator + solutionName;
 		//先解压文件
-		util.unzipSolution(solutionName);
+		util.unzipSolution(displayName, solutionName);
 		//文件夹中所有图片,生成File对象
 		File dirc = new File(filePath);
 		pics = dirc.listFiles(new PicFilter());
@@ -273,8 +290,8 @@ public class PicFullScreen {
 		currentPic = pics[0];
 		picPoint = 0;
 		//获取播放方案配置
-		config = util.parseConfigXml(solutionName);
-		
+//		config = util.parseConfigXml(solutionName);
+		listOfPlayControl = util.parseXml(displayName, solutionName);
 		//显示图片到画布上
 //		drawImage(); 
 		
@@ -287,5 +304,46 @@ public class PicFullScreen {
 		PicFullScreen.isReloadSolution = isReloadSolution;
 	}
 	
-	
+	/**
+	 * 获取暂停播放时间
+	 * @param picIndex
+	 * @return
+	 * -1表示不能播放
+	 * >0表示播放几秒
+	 */
+	private int getTimeInterval(int picIndex){
+		//默认可以播放
+		PlayControl playControl = listOfPlayControl.get(picIndex);
+		
+		//1.比较日期范围是否valid
+		//2.比较时间范围是否valid
+		//3.星期是否valid
+		
+		//比较日期+时间
+		java.util.Date curDate = new java.util.Date();
+		String beginDateStr = playControl.getDateTimeStart().toString() + " " + playControl.getTimeStart();
+		String afterDateStr = playControl.getDateTimeEnd().toString() + " " + playControl.getTimeEnd();
+		
+		java.sql.Timestamp beginDate = java.sql.Timestamp.valueOf(beginDateStr);
+		java.sql.Timestamp afterDate = java.sql.Timestamp.valueOf(afterDateStr);
+		
+		if(!(curDate.after(beginDate) && curDate.before(afterDate))){
+			return -1;
+		}
+		
+		//比较星期
+		String weekdaysStr = playControl.getWeekdays();
+		//获取当前星期
+		Calendar c = Calendar.getInstance();
+        int curWeekday = c.get(Calendar.DAY_OF_WEEK) - 1;
+        if(curWeekday < 0)
+        	curWeekday = 6;
+        if(weekdaysStr.charAt(curWeekday) == '0')
+        	return -1;
+        
+        //日期、时间和星期都valid获取播放间隔时间返回
+        int timeInterval = playControl.getTimeInterval();
+		
+        return timeInterval;
+	}
 }
