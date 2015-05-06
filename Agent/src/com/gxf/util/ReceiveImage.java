@@ -133,12 +133,15 @@ public class ReceiveImage {
 				System.out.println("imageName = " + imageName);
 				//获取播放方案名
 				int solutionNameEndIndex = imageName.indexOf('.');
+				//这里的solutionName形式为displayName+playSolution
 				solutionName = imageName.substring(0, solutionNameEndIndex);
+				
 				//这里需要获取显示屏名和播放方案名
 				String names[] = solutionName.split("\\+");
-				String displayName = names[0];
-				String playSolutinName = names[1];
-				this.displayName = displayName;
+//				String displayName = names[0];
+//				String playSolutinName = names[1];
+				this.displayName = names[0];
+				this.solutionName = names[1];
 				
 				sb.delete(0, file_name_end + IMAGE_FILE_NAME_END.length());
 				

@@ -54,6 +54,12 @@ public class Util {
         String filePath = getCurrentProjectPath() + File.separator + "playSolutions" + File.separator + displayName + File.separator + solutionName + ".zip";
         String desPath = filePath.substring(0, filePath.lastIndexOf("\\")) + "\\";
         
+        //删除播放方案图片，避免解压合并文件，造成多余图片
+        File desFileTem = new File(desPath);
+        //存在先删除在解压
+        if(desFileTem.exists())
+        	desFileTem.delete();
+        
         int count = 0;
         byte[] a = new byte[BUFFER];
         File file = new File(filePath);

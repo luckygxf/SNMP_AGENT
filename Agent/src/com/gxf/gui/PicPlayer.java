@@ -298,8 +298,12 @@ public class PicPlayer extends ApplicationWindow {
 		//初始化直接选择0就ok了
 		listOfPlayControl = util.parseXml(combo_display.getItem(0), combo_playSolution.getItem(0));
 		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
+		//为组合框添加监听器
+		combo_display.addSelectionListener(new ComboSelectionChangeListener());
+		combo_playSolution.addSelectionListener(new ComboSelectionChangeListener());
+		
 		//启动需要的后台线程
-//		initThread();
+		initThread();
 	}
 
 	/**
@@ -766,5 +770,32 @@ public class PicPlayer extends ApplicationWindow {
         int timeInterval = playControl.getTimeInterval();
 		
         return timeInterval;
+	}
+	
+	/**
+	 * 组合框选择变化
+	 * @author Administrator
+	 *
+	 */
+	class ComboSelectionChangeListener extends SelectionAdapter{
+
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			if(e.getSource() == combo_display){							//显示屏变化
+				String playSolutionNames[] = getSolutions();
+				//没有播放方案直接返回
+				if(playSolutionNames.length == 0)
+					return;
+				combo_playSolution.setItems(playSolutionNames);
+				combo_playSolution.select(0);
+				//重新加载播放方案
+				importPlaySolution();
+			}
+			else if(e.getSource() == combo_playSolution){				//播放方案变化
+				//重新加载播放方案
+				importPlaySolution();
+			}
+		}
+		
 	}
 }
