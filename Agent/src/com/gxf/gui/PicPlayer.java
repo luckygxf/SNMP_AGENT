@@ -41,6 +41,7 @@ import com.gxf.util.Config;
 import com.gxf.util.PicFilter;
 import com.gxf.util.PlayControl;
 import com.gxf.util.ReceiveImage;
+import com.gxf.util.ReceiveRequestThread;
 import com.gxf.util.SolutionNameFilter;
 import com.gxf.util.Util;
 
@@ -634,6 +635,8 @@ public class PicPlayer extends ApplicationWindow {
 //		messageReceiver.run();								//启动消息接收器，这里监听的是16200端口
 		ReceiveImage receiveImage = new ReceiveImage();
 		receiveImage.listen();								//监听16201端口接收图片
+		ReceiveRequestThread receiveRequestThread = new ReceiveRequestThread();
+		receiveRequestThread.start(); 						//监听16202端口接收连接请求
 	}
 	
 	/**
