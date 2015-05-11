@@ -51,7 +51,8 @@ public class Util {
     public void unzipSolution(String displayName, String solutionName){
     	int BUFFER = 2048;  	
         
-        String filePath = getCurrentProjectPath() + File.separator + "playSolutions" + File.separator + displayName + File.separator + solutionName + ".zip";
+        String filePath = getCurrentProjectPath() + File.separator + "playSolutions" + File.separator + displayName +
+        		File.separator + displayName + "+" + solutionName + ".zip";
         String desPath = filePath.substring(0, filePath.lastIndexOf("\\")) + "\\";
         
         //删除播放方案图片，避免解压合并文件，造成多余图片
