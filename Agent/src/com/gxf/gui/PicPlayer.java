@@ -116,6 +116,7 @@ public class PicPlayer extends ApplicationWindow {
 	 */
 	public PicPlayer() {
 		super(null);
+		setShellStyle(SWT.MIN);
 		createActions();
 		addToolBar(SWT.FLAT | SWT.WRAP);
 		addMenuBar();
@@ -351,8 +352,7 @@ public class PicPlayer extends ApplicationWindow {
 	 */
 	@Override
 	protected StatusLineManager createStatusLineManager() {
-		StatusLineManager statusLineManager = new StatusLineManager();
-		return statusLineManager;
+		return null;
 	}
 
 	/**
@@ -380,6 +380,16 @@ public class PicPlayer extends ApplicationWindow {
 		picPlayerShell.setText("图片播放器--by GXF");
 //		picPlayerShell.setLayout(new FillLayout());
 //		picPlayerShell.setBounds(Display.getDefault().getPrimaryMonitor().getBounds());
+		
+		//关闭窗口终止当前虚拟机
+		picPlayerShell.addListener(SWT.Close, new Listener() {
+			
+			@Override
+			public void handleEvent(Event arg0) {
+				System.exit(0);
+				
+			}
+		});
 	}
 
 	/**

@@ -205,15 +205,7 @@ public class PicFullScreen {
 				}
 				picPoint = picPoint % pics.length;
 				currentPic = pics[picPoint];			
-				curShell.getDisplay();
-				Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						drawImage();
-						
-					}
-				});
+				
 				try {
 //					sleep((long)(config.getPlayTimeInterval() * 1000));
 					//获取播放间隔
@@ -223,6 +215,14 @@ public class PicFullScreen {
 						picPoint++;
 						continue;
 					}
+					Display.getDefault().syncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							drawImage();
+							
+						}
+					});
 					sleep((long)(timeInterval * 1000));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -335,11 +335,13 @@ public class PicFullScreen {
 		String weekdaysStr = playControl.getWeekdays();
 		//获取当前星期
 		Calendar c = Calendar.getInstance();
-        int curWeekday = c.get(Calendar.DAY_OF_WEEK) - 1;
+        int curWeekday = (c.get(Calendar.DAY_OF_WEEK) - 2);
         if(curWeekday < 0)
         	curWeekday = 6;
         if(weekdaysStr.charAt(curWeekday) == '0')
         	return -1;
+        
+//        System.out.println("curWeekdayStr = " + weekdaysStr + "curWeekday = " + curWeekday);
         
         //日期、时间和星期都valid获取播放间隔时间返回
         int timeInterval = playControl.getTimeInterval();
