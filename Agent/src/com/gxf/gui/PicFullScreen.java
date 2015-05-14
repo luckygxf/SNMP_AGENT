@@ -4,6 +4,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -47,7 +48,7 @@ public class PicFullScreen {
 	
 	//播放方案配置
 	private Config config;
-	private List<PlayControl> listOfPlayControl;
+	private Map<String, PlayControl> mapOfPlayControl;
 	
 	//播放方案名称
 	public static String solutionName;
@@ -291,7 +292,7 @@ public class PicFullScreen {
 		picPoint = 0;
 		//获取播放方案配置
 //		config = util.parseConfigXml(solutionName);
-		listOfPlayControl = util.parseXml(displayName, solutionName);
+		mapOfPlayControl = util.parseXml(displayName, solutionName);
 		//显示图片到画布上
 //		drawImage(); 
 		
@@ -312,8 +313,9 @@ public class PicFullScreen {
 	 * >0表示播放几秒
 	 */
 	private int getTimeInterval(int picIndex){
+		String picName = pics[picIndex].getName();
 		//默认可以播放
-		PlayControl playControl = listOfPlayControl.get(picIndex);
+		PlayControl playControl = mapOfPlayControl.get(picName);
 		
 		//1.比较日期范围是否valid
 		//2.比较时间范围是否valid

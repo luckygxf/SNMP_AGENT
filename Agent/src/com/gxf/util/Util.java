@@ -9,13 +9,15 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;
 import org.dom4j.Document;
-
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
@@ -188,8 +190,11 @@ public class Util {
      * @param playSolutionName
      * @return
      */
-    public List<PlayControl> parseXml(String displayName, String playSolutionName){
-    	List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
+    public Map<String, PlayControl> parseXml(String displayName, String playSolutionName){
+//    	List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
+    	
+    	Map<String, PlayControl> playControls = new HashMap<String ,PlayControl>();
+    	
     	//获取xml路径
     	String curProjectPath = getCurrentProjectPath();
     	String configXmlPath = curProjectPath + File.separator + "playSolutions" + File.separator 
@@ -204,6 +209,9 @@ public class Util {
 			Element root = document.getRootElement();
 			for(Iterator<Element> it_picture = root.elementIterator(); it_picture.hasNext();){
 				Element picture = (Element) it_picture.next();
+				//获取图片名称在xml中
+				String picName = picture.attribute("name").getValue();
+				
 				//解析获得的控制信息
 				PlayControl playControl = new PlayControl();
 				for(Iterator<Element> it_in = picture.elementIterator(); it_in.hasNext();){
@@ -229,14 +237,13 @@ public class Util {
 					Element weekdays = (Element) it_in.next();
 					playControl.setWeekdays(weekdays.getText());
 				}//for
-				
-				listOfPlayControl.add(playControl);
+				playControls.put(picName, playControl);
 			}//for
     	}catch(Exception e){
     		e.printStackTrace();
     	}
     	
-    	return listOfPlayControl;
+    	return playControls;
     }
 
 }

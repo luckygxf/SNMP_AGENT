@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.StatusLineManager;
@@ -109,8 +110,8 @@ public class PicPlayer extends ApplicationWindow {
 	public static String solutionName;
 	public static String displayName;
 	
-	private List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
-	
+//	private List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
+	private Map<String, PlayControl> mapOfPlayControl;
 	/**
 	 * Create the application window.
 	 */
@@ -298,8 +299,9 @@ public class PicPlayer extends ApplicationWindow {
 		solutionName = combo_playSolution.getItem(combo_playSolution.getSelectionIndex());
 
 		//初始化直接选择0就ok了
-		listOfPlayControl = util.parseXml(combo_display.getItem(0), combo_playSolution.getItem(0));
-		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
+		mapOfPlayControl = util.parseXml(combo_display.getItem(0), combo_playSolution.getItem(0));
+		String picName = pics[picPoint].getName();
+		txt_playtime_interval.setText(String.valueOf(mapOfPlayControl.get(picName).getTimeInterval()));
 		//为组合框添加监听器
 		combo_display.addSelectionListener(new ComboSelectionChangeListener());
 		combo_playSolution.addSelectionListener(new ComboSelectionChangeListener());
@@ -506,8 +508,9 @@ public class PicPlayer extends ApplicationWindow {
 		currentPic = pics[0];
 		picPoint = 0;
 		//导入配置文件，解析
-		listOfPlayControl = util.parseXml(displayName, playSolutionName);
-		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
+		mapOfPlayControl = util.parseXml(displayName, playSolutionName);
+		String picName = pics[picPoint].getName();
+		txt_playtime_interval.setText(String.valueOf(mapOfPlayControl.get(picName).getTimeInterval()));
 		
 		//设置按钮状态
 		isImportSolution = true;
@@ -533,8 +536,9 @@ public class PicPlayer extends ApplicationWindow {
 		lb_curPicName.setVisible(true);
 		lb_curPicName.setText(currentPic.getName());
 		canvas_picshow.redraw();
+		String picName = pics[picPoint].getName();
 		//显示播放间隔时间
-		txt_playtime_interval.setText(String.valueOf(listOfPlayControl.get(picPoint).getTimeInterval()));
+		txt_playtime_interval.setText(String.valueOf(mapOfPlayControl.get(picName).getTimeInterval()));
 		
 	}
 	
@@ -750,8 +754,10 @@ public class PicPlayer extends ApplicationWindow {
 	 * >0表示播放几秒
 	 */
 	private int getTimeInterval(int picIndex){
+		String picName = pics[picIndex].getName();
+		
 		//默认可以播放
-		PlayControl playControl = listOfPlayControl.get(picIndex);
+		PlayControl playControl = mapOfPlayControl.get(picName);
 		
 		//1.比较日期范围是否valid
 		//2.比较时间范围是否valid
