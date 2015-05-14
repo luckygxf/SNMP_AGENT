@@ -250,10 +250,10 @@ public class PicFullScreen {
 		//双击鼠标退出全屏
 		@Override
 		public void mouseDoubleClick(MouseEvent arg0) {
-			//退出全屏，设置前面shell显示出来
-			curShell.dispose();
 			//停止全屏播放线程
 			setIsStop(true);
+			//退出全屏，设置前面shell显示出来
+			curShell.dispose();
 			//设置前面shell可见
 			PicPlayer.curShell.setVisible(true);
 		}
@@ -335,7 +335,7 @@ public class PicFullScreen {
 		String weekdaysStr = playControl.getWeekdays();
 		//获取当前星期
 		Calendar c = Calendar.getInstance();
-        int curWeekday = (c.get(Calendar.DAY_OF_WEEK) - 2);
+        int curWeekday = (c.get(Calendar.DAY_OF_WEEK) - 1);
         if(curWeekday < 0)
         	curWeekday = 6;
         if(weekdaysStr.charAt(curWeekday) == '0')
