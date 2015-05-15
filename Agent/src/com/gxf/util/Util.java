@@ -214,6 +214,7 @@ public class Util {
 				
 				//解析获得的控制信息
 				PlayControl playControl = new PlayControl();
+				playControl.setPicName(picName);
 				for(Iterator<Element> it_in = picture.elementIterator(); it_in.hasNext();){
 					//type
 					Element type = (Element) it_in.next();
@@ -236,6 +237,9 @@ public class Util {
 					//weekdays
 					Element weekdays = (Element) it_in.next();
 					playControl.setWeekdays(weekdays.getText());
+					//playOrder
+					Element playOrder = (Element) it_in.next();
+					playControl.setPlayOrder(Integer.valueOf(playOrder.getText()));
 				}//for
 				playControls.put(picName, playControl);
 			}//for

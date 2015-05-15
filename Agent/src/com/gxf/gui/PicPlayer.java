@@ -3,6 +3,8 @@ package com.gxf.gui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -245,6 +247,9 @@ public class PicPlayer extends ApplicationWindow {
 	 * 对控件进行初始化，初始化控件大小，初始化显示的内容
 	 */
 	public void init(){
+		//启动需要的后台线程
+		initThread();
+		
 		canvas_picshow.addPaintListener(new PaintListener() {
 			
 			@Override
@@ -306,8 +311,7 @@ public class PicPlayer extends ApplicationWindow {
 		combo_display.addSelectionListener(new ComboSelectionChangeListener());
 		combo_playSolution.addSelectionListener(new ComboSelectionChangeListener());
 		
-		//启动需要的后台线程
-		initThread();
+		
 	}
 
 	/**
@@ -495,7 +499,7 @@ public class PicPlayer extends ApplicationWindow {
 		String displayName = combo_display.getItem(combo_display.getSelectionIndex());
 		String playSolutionName = combo_playSolution.getItem(combo_playSolution.getSelectionIndex());
 		
-		//-----------------------------华丽丽的分割线-------------------------------------
+
 		String projectPath = util.getCurrentProjectPath();
 		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS + File.separator + displayName
 							+ File.separator + playSolutionName;
@@ -503,12 +507,30 @@ public class PicPlayer extends ApplicationWindow {
 		PicPlayer.solutionName = playSolutionName;
 		PicPlayer.displayName = displayName;
 		//文件夹中所有图片,生成File对象
-		File dirc = new File(filePath);
-		pics = dirc.listFiles(new PicFilter());		
+		//这里的图片不直接从磁盘中读取
+		//从xml中读取文件路径，在到磁盘中
+		
+		mapOfPlayControl = util.parseXml(displayName, solutionName);
+		
+		List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
+		for(Iterator<String> it = mapOfPlayControl.keySet().iterator(); it.hasNext();){
+			String temp_picName = it.next();
+			listOfPlayControl.add(mapOfPlayControl.get(temp_picName));
+		}//for
+		
+		//排序
+		Collections.sort(listOfPlayControl);
+		pics = new File[listOfPlayControl.size()];
+		for(int i = 0; i < pics.length; i++){
+			pics[i] = new File(filePath + File.separator + listOfPlayControl.get(i).getPicName());
+		}//for
+		
+		
+		//-----------------------------------------华丽丽的分割线------------------------------------------
+		
 		currentPic = pics[0];
 		picPoint = 0;
-		//导入配置文件，解析
-		mapOfPlayControl = util.parseXml(displayName, playSolutionName);
+	
 		String picName = pics[picPoint].getName();
 		txt_playtime_interval.setText(String.valueOf(mapOfPlayControl.get(picName).getTimeInterval()));
 		

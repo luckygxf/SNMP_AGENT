@@ -2,7 +2,10 @@ package com.gxf.gui;
 
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +51,7 @@ public class PicFullScreen {
 	
 	//播放方案配置
 	private Config config;
-	private Map<String, PlayControl> mapOfPlayControl;
+	private Map<String, PlayControl> mapOfPlayControl;  			//图片名称和控制信息map
 	
 	//播放方案名称
 	public static String solutionName;
@@ -283,16 +286,29 @@ public class PicFullScreen {
 		String filePath = projectPath + File.separator + DIC_NAME_PLAY_SOLUTIONS + File.separator + displayName
 				+ File.separator + solutionName;
 		//先解压文件
-		util.unzipSolution(displayName, solutionName);
+//		util.unzipSolution(displayName, solutionName);
 		//文件夹中所有图片,生成File对象
-		File dirc = new File(filePath);
-		pics = dirc.listFiles(new PicFilter());
+		//这里图片文件不能直接从硬盘中读取
+		//从xml中解析顺序生成文件对象，实现对图片播放顺序的控制
+		//获取播放方案配置
+		mapOfPlayControl = util.parseXml(displayName, solutionName);
+		
+		List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
+		for(Iterator<String> it = mapOfPlayControl.keySet().iterator(); it.hasNext();){
+			String temp_picName = it.next();
+			listOfPlayControl.add(mapOfPlayControl.get(temp_picName));
+		}//for
+		
+		//排序
+		Collections.sort(listOfPlayControl);
+		pics = new File[listOfPlayControl.size()];
+		for(int i = 0; i < pics.length; i++){
+			pics[i] = new File(filePath + File.separator + listOfPlayControl.get(i).getPicName());
+		}//for
+
 		
 		currentPic = pics[0];
 		picPoint = 0;
-		//获取播放方案配置
-//		config = util.parseConfigXml(solutionName);
-		mapOfPlayControl = util.parseXml(displayName, solutionName);
 		//显示图片到画布上
 //		drawImage(); 
 		

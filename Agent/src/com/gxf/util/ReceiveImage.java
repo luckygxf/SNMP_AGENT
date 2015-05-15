@@ -272,7 +272,7 @@ public class ReceiveImage {
 	 */
 	public void reLoadSolution(String displayName, String solutionName){
 		//该解压播放方案
-//		util.unzipSolution(PicPlayer.solutionName);
+		util.unzipSolution(displayName, solutionName);
 		PicFullScreen.displayName = displayName;
 		PicFullScreen.solutionName = solutionName;
 		PicFullScreen.setIsReloadSolution(true);
