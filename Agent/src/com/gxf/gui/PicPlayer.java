@@ -41,6 +41,7 @@ import com.gxf.actions.ImportAction;
 import com.gxf.snmp.MyIP;
 import com.gxf.snmp.SnmpReceiveMessage;
 import com.gxf.util.Config;
+import com.gxf.util.CoorPoint;
 import com.gxf.util.PicFilter;
 import com.gxf.util.PlayControl;
 import com.gxf.util.ReceiveImage;
@@ -111,6 +112,8 @@ public class PicPlayer extends ApplicationWindow {
 //	public static Config config;
 	public static String solutionName;
 	public static String displayName;
+	
+	
 	
 //	private List<PlayControl> listOfPlayControl = new ArrayList<PlayControl>();
 	private Map<String, PlayControl> mapOfPlayControl;
@@ -255,7 +258,10 @@ public class PicPlayer extends ApplicationWindow {
 			@Override
 			public void paintControl(PaintEvent arg0) {
 				if(curImage != null)
+				{
 					arg0.gc.drawImage(curImage, 0, 0);
+						
+				}
 				
 			}
 		});
@@ -839,4 +845,5 @@ public class PicPlayer extends ApplicationWindow {
 		}
 		
 	}
+	
 }

@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.gxf.util.Config;
+import com.gxf.util.CoorPoint;
 import com.gxf.util.PicFilter;
 import com.gxf.util.PlayControl;
 import com.gxf.util.Util;
@@ -64,7 +65,16 @@ public class PicFullScreen {
 	
 	//存放所有播放方案的文件夹
 	private final String DIC_NAME_PLAY_SOLUTIONS = "playSolutions";
-
+	
+	//--------------------------------播放特效控制-------------------------
+	private CoorPoint points[] = new CoorPoint[4];
+	private int heightOfCanvas;
+	private int widthOfCanvas;
+	private int pointsIndex;
+	private final int DISTANCE = 70;
+	private final int SPEED = 100;
+	private Thread playStyleThread[] = new Thread[4];
+	
 	public PicFullScreen(String displayName, String solutionName){
 		PicFullScreen.solutionName = solutionName;
 		PicFullScreen.displayName = displayName;
@@ -98,7 +108,7 @@ public class PicFullScreen {
 
 		//获取屏幕宽度和高度
 		int iSreenWith = Toolkit.getDefaultToolkit().getScreenSize().width;
-		int iSreenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+		int iSreenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;		
 		
 		//设置shell宽度和高度
 		curShell.setSize(iSreenWith, iSreenHeight);
@@ -119,8 +129,8 @@ public class PicFullScreen {
 			@Override
 			public void paintControl(PaintEvent arg0) {
 				if(curImage != null)
-					arg0.gc.drawImage(curImage, 0, 0);
-				
+//					arg0.gc.drawImage(curImage, 0, 0);
+					arg0.gc.drawImage(curImage, points[pointsIndex].getX(), points[pointsIndex].getY());
 			}
 		});		
 		
@@ -133,6 +143,14 @@ public class PicFullScreen {
 		//启动自动播放线程
 		PlayPicThread picPlayThread = new PlayPicThread();
 		picPlayThread.start();
+		
+		//--------------------------图片播放特效设置----------------------------------
+		//获取画布的大小，用于图片播放特效 
+		widthOfCanvas = iSreenWith;
+		heightOfCanvas = iSreenHeight;
+		
+		initPoints();
+		initPlayStyleThread();
 	}
 		
 	/**
@@ -227,6 +245,10 @@ public class PicFullScreen {
 							
 						}
 					});
+					//-----------------图片显示特效---------------
+					initPlayStyleThread();
+					pointsIndex = (pointsIndex + 1) % 4;
+					playStyleThread[pointsIndex].start();
 					sleep((long)(timeInterval * 1000));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -366,4 +388,216 @@ public class PicFullScreen {
 		
         return timeInterval;
 	}
+	
+	
+	
+	//----------------------------------播放特效控制--------------------------------------------
+		/**
+		 * 初始化四种播放方式起始点
+		 */
+		private void initPoints(){
+			//上左下右
+			points[0] = new CoorPoint(0, heightOfCanvas);
+			points[1] = new CoorPoint(widthOfCanvas, 0);
+			points[2] = new CoorPoint(0, -heightOfCanvas);
+			points[3] = new CoorPoint(-widthOfCanvas, 0);
+		}
+		
+		/**
+		 * 上拉特效
+		 * @author Administrator
+		 *
+		 */
+		class MoveUpThread extends Thread{
+			@Override
+			public void run(){
+				initPoints();
+				while(!Display.getDefault().isDisposed()){
+					if(points[pointsIndex].getY() <= 0)
+					{
+						points[pointsIndex].setY(0);
+						break;
+					}//if
+					
+					points[pointsIndex].setY(points[pointsIndex].getY() - DISTANCE);
+//					System.out.println("y = " + y);
+					
+					try {
+						sleep(SPEED);
+						if(!Display.getDefault().isDisposed())
+							Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								if(canvas_picshow != null)
+									canvas_picshow.redraw();
+								
+							}
+							
+						});
+						
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		}
+		
+		/**
+		 * 左拉
+		 * @author Administrator
+		 *
+		 */
+		class MoveLeftThread extends Thread{
+			@Override
+			public void run(){
+				initPoints();
+				
+				while(!Display.getDefault().isDisposed()){
+					
+					if(points[pointsIndex].getX() <= 0)
+					{
+						points[pointsIndex].setX(0);
+						break;
+					}//if
+					
+					points[pointsIndex].setX(points[pointsIndex].getX() - DISTANCE);
+					
+					try {
+						sleep(SPEED);
+						if(!Display.getDefault().isDisposed())
+							Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								canvas_picshow.redraw();								
+							}
+							
+						});
+						
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		/**
+		 * 下拉
+		 * @author Administrator
+		 *
+		 */
+		class MoveDownThread extends Thread{
+			@Override
+			public void run(){
+				initPoints();
+				
+				while(!Display.getDefault().isDisposed()){				
+					if(points[pointsIndex].getY() >= 0)
+					{
+						points[pointsIndex].setY(0);
+						break;
+					}//if
+					
+					points[pointsIndex].setY(points[pointsIndex].getY() + DISTANCE);
+					
+					try {
+						sleep(SPEED);
+						if(!Display.getDefault().isDisposed())
+							Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								canvas_picshow.redraw();								
+							}
+							
+						});
+						
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		/**
+		 * 向右拉
+		 * @author Administrator
+		 *
+		 */
+		class MoveRightThread extends Thread{
+			@Override
+			public void run(){
+				initPoints();
+				
+				while(!Display.getDefault().isDisposed()){
+					
+					if(points[pointsIndex].getX() >= 0)
+					{
+						points[pointsIndex].setX(0);
+						break;
+					}//if
+					
+					points[pointsIndex].setX(points[pointsIndex].getX() + DISTANCE);
+					
+					try {
+						sleep(SPEED);
+						if(!Display.getDefault().isDisposed())
+							Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								canvas_picshow.redraw();
+								
+							}
+							
+						});
+						
+					} catch (InterruptedException e) {
+						
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		/**
+		 * 切换播放方式
+		 * @author Administrator
+		 *
+		 */
+		class SwitchStyleThread extends Thread{		
+			
+			@Override
+			public void run(){
+				try {
+					while(!getIsStop()){
+						initPlayStyleThread();
+						pointsIndex = (pointsIndex + 1) % 4;
+						playStyleThread[pointsIndex].start();
+						sleep(getTimeInterval(picPoint) * 1000);
+					}
+					
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+		}
+		
+		/**
+		 * 初始化播放特效线程
+		 */
+		private void initPlayStyleThread(){
+			playStyleThread[0] = new MoveUpThread();
+			playStyleThread[1] = new MoveLeftThread();
+			playStyleThread[2] = new MoveDownThread();
+			playStyleThread[3] = new MoveRightThread();
+
+		}
 }
