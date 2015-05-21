@@ -472,7 +472,8 @@ public class PicFullScreen {
 
 							@Override
 							public void run() {
-								canvas_picshow.redraw();								
+								if(!canvas_picshow.isDisposed())
+									canvas_picshow.redraw();								
 							}
 							
 						});
@@ -511,7 +512,8 @@ public class PicFullScreen {
 
 							@Override
 							public void run() {
-								canvas_picshow.redraw();								
+								if(!canvas_picshow.isDisposed())
+									canvas_picshow.redraw();								
 							}
 							
 						});
@@ -551,7 +553,8 @@ public class PicFullScreen {
 
 							@Override
 							public void run() {
-								canvas_picshow.redraw();
+								if(!canvas_picshow.isDisposed())
+									canvas_picshow.redraw();
 								
 							}
 							

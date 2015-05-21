@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -143,6 +145,7 @@ public class PicPlayer extends ApplicationWindow {
 		scrolledComposite_top.setExpandVertical(true);
 		
 		canvas_picshow = new Canvas(scrolledComposite_top, SWT.NONE);
+		canvas_picshow.setBounds(0, 38, 856, 410);
 		scrolledComposite_top.setContent(canvas_picshow);
 		scrolledComposite_top.setMinSize(canvas_picshow.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -317,6 +320,12 @@ public class PicPlayer extends ApplicationWindow {
 		combo_display.addSelectionListener(new ComboSelectionChangeListener());
 		combo_playSolution.addSelectionListener(new ComboSelectionChangeListener());
 		
+		//添加上下文菜单，刷新
+		Menu contextMenu = new Menu(curShell, SWT.POP_UP);
+		MenuItem refreshItem = new MenuItem(contextMenu, SWT.PUSH);
+		refreshItem.setText("刷新");
+		canvas_picshow.setMenu(contextMenu);
+		refreshItem.addSelectionListener(new MenuItemClassListenerImp());
 		
 	}
 
@@ -841,6 +850,37 @@ public class PicPlayer extends ApplicationWindow {
 			else if(e.getSource() == combo_playSolution){				//播放方案变化
 				//重新加载播放方案
 				importPlaySolution();
+			}
+		}
+		
+	}
+	
+	/**
+	 * 上下文菜单，事件监听器
+	 * @author Administrator
+	 *
+	 */
+	class MenuItemClassListenerImp extends SelectionAdapter{
+
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			MenuItem tempItem = (MenuItem) e.getSource();
+			if(tempItem.getText().equals("刷新")){
+				//初始化显示屏信息
+				String displayNames[] = getDisplayNames();
+				
+				//初始化显示屏信息
+				if(displayNames.length != 0){
+					combo_display.setItems(displayNames);
+					combo_display.select(0);
+				}
+				
+				//初始化播放方案
+				String playSolutions[] = getSolutions();
+				if(playSolutions.length != 0){
+					combo_playSolution.setItems(playSolutions);
+					combo_playSolution.select(0);
+				}
 			}
 		}
 		
